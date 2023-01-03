@@ -89,7 +89,7 @@ userSchema.methods.addToCart = function (product) {
             productId:product._id,
             qty:1,price:product.price,
             name:product.name,
-            image:product.image,
+            image:product.image[0],
             })
     }
     cart.totalPrice += product.price

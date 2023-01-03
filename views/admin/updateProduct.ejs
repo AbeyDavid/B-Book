@@ -57,7 +57,8 @@
                     <label class="col-lg-3 control-label">Update Category</label>
                     <div class="col-lg-8">
                         <div class="ui-select">
-                          <select id="user_time_zone" class="form-control" name="category">
+                          <select id="user_time_zone" class="form-control" name="category" >
+                            <option value="<%= product[0].category %> "><%= product[0].category %></option>
                             <%
                           if(categories.length>0){
                               for(let i=0;i<categories.length;i++){

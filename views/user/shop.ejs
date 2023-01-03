@@ -35,7 +35,7 @@
                             <div class="col-sm-6 col-md-6 col-lg-3 ftco-animate">
                                 <div class="product">
                                     <a href="/singleProduct?id=<%= products[i]._id%>" class="img-prod"
-                                        ><img class="img-fluid" src="/productImages/<%= products[i].image%>" alt="Colorlib Template" />
+                                        ><img class="img-fluid" src="/productImages/<%= products[i].image[0]%>" alt="Colorlib Template" />
                                         <% if(products[i].offer != 0){
                                             %>
                                             <span class="status"><%= products[i].offer %>%</span>
@@ -63,7 +63,7 @@
         
                                             <%}else{%> 
                                                 <input type="hidden" value="<%=products[i].id %>">
-                                                <a class="add-to-cart text-center py-2 mr-1 addToCartbtn"
+                                                <a class="add-to-cart text-center py-2 mr-1 addToCartbtn" 
                                                     ><span>Add to cart <i class="ion-ios-add ml-1"></i></span
                                                 ></a>
                                             
@@ -117,7 +117,8 @@
     </div>
 </section>
 
-<script>
+<script>  
+
     function sendData(e){
         const searchResults= document.getElementById("searchResults")
         let match = e.value.match(/^[a-zA-Z ]*$/);
@@ -172,6 +173,6 @@ addToCartbtns.forEach(x=>{
   x.addEventListener('click',addToCartbtnHandler) 
 })
 
-</script>
+</script>   
 
 <%- include("../layouts/footer.ejs") %>

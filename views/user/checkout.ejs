@@ -198,7 +198,12 @@
                 document.querySelector('#message').innerHTML = "<p>Expired Coupen</p>"
                 document.querySelector('#coupenAmt').innerText = ""
                 document.querySelector('#sellingPrice').innerText = ""
-            }else{
+            }else if(value.b){
+                document.querySelector('#coupenAmt').innerText = ""
+                document.querySelector('#sellingPrice').innerText = ""
+                document.querySelector('#message').innerHTML += `<p>Need ${value.cartTotal-value.minAmt} ₹ more to Apply Coupen</p>`
+            }
+            else{
                 document.querySelector('#message').innerHTML = "<p>Invalid Coupen</p>"
                 document.querySelector('#coupenAmt').innerText = ""
                 document.querySelector('#sellingPrice').innerText = ""

@@ -267,9 +267,8 @@ const addToCart = async (req, res) => {
         console.log(error.message);
     }
 };
-
+ 
 const addToCartFrom = async (req, res) => {
-
     const productId = req.query.id;
     const quantity = { a: parseInt(req.body.qty) };
 
@@ -277,13 +276,13 @@ const addToCartFrom = async (req, res) => {
     const userData = await User.findById({ _id: userSession.user });
     const productData = await Product.findById({ _id: productId });
     const add = await userData.addToCart(productData, quantity);
-    const cartLength = userData.cart.item.length 
+    const cartLength = userData.cart.item.length;
     if (add) {
         userData.removeFromWishlist(productId);
-        res.json({ cartLength });
-    }  
+        res.json({ cartLength }); 
+    }
 };
-
+    
 const changeProductQnty = async (req, res) => {
     try {
         const id = req.query.id;
@@ -334,7 +333,7 @@ const getCheckout = async (req, res) => {
         console.log(error.message);
     }
 };
-var sellingPrice = 0
+var sellingPrice = 0;
 const coupenApply = async (req, res) => {
     try {
         const userId = req.session.user;
@@ -343,20 +342,27 @@ const coupenApply = async (req, res) => {
         const couponData = await Coupon.findOne({ code: coupen });
         if (couponData) {
             if (couponData.isActive) {
+                var minAmt = couponData.Minimumbill;
+                var cartTotal = userData.cart.totalPrice;
+                if (cartTotal > minAmt) {
+                    const coupenAmount = couponData.amount;
+                    sellingPrice = userData.cart.totalPrice - coupenAmount;
+                    res.json({ coupenAmount, cartTotal });
+                }else{
+                    let b=1
+                    res.json({ b,cartTotal,minAmt });
+                }
                 const coupenAmount = couponData.amount;
-                const cartTotal = userData.cart.totalPrice;
                 sellingPrice = userData.cart.totalPrice - coupenAmount;
                 res.json({ coupenAmount, cartTotal });
-
             } else {
-                let a = 1
-                res.json({a})
+                let a = 1;
+                res.json({ a });
             }
-        }else{  
+        } else {
             console.log("dfg");
             res.json({ message: "Invalid Coupen" });
         }
-        
     } catch (error) {
         console.log(error.message);
     }
@@ -375,17 +381,17 @@ const createOrder = async (req, res) => {
             order = new Orders({
                 userId: _id,
                 name: userData.name,
-                country,
+                country,    
                 address,
-                city,
+                city,   
                 state,
                 zip,
                 phone: phonenumber,
                 email,
-               
-                products: populatedData.cart,
+
+                products: populatedData.cart, 
                 payment: req.body.payment,
-                sellingPrice: sellingPrice
+                sellingPrice: sellingPrice,
             });
         } else if (req.body.address) {
             const { name, country, address, city, state, zip, phone, email, payment } = req.body;
@@ -399,10 +405,10 @@ const createOrder = async (req, res) => {
                 zip,
                 phone,
                 email,
-                
+
                 products: populatedData.cart,
                 payment,
-                sellingPrice: sellingPrice
+                sellingPrice: sellingPrice,
             });
         } else {
             req.flash("message", "Please Fill The Form");
