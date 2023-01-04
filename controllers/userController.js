@@ -51,11 +51,11 @@ const postRegister = async (req, res) => {
             res.render("user/register", { nameMsg: error1.msg, usernameMsg: error2.msg, pwdMsg: error3.msg, userData });
         } else {
             try {
-                const email = req.body.email;
+                const email = req.body.email;  
                 const Udata = await User.findOne({ email: email });
                 if (Udata) {
                     const userData = [];
-                    res.render("user/register", { emessage: "User Already Exist", userData });
+                    res.render("user/register", { emessage: "Email Already Exist", userData });
                 }
                 const spassword = await securePassword(req.body.password);
                 const user = new User({
@@ -66,7 +66,7 @@ const postRegister = async (req, res) => {
                     is_admin: 0,
                 });
                 const userData = await user.save();
-                newUser = userData._id;
+                newUser = userData._id;   
                 if (userData) {
                     res.redirect("/getOtp");
                 } else {
@@ -303,7 +303,7 @@ const getCart = async (req, res) => {
         const categoryData = await Category.find();
         res.render("user/cart", { categoryData, userData });
     } catch (error) {
-        console.log(error.message);
+        console.log(error.message);  
     }
 };
 
@@ -318,15 +318,14 @@ const addToCart = async (req, res) => {
             req.flash("message", "Add To Cart Successfully");
             res.redirect("/singleProduct?id=" + productId);
         }, 1000);
-    } catch (error) {
+    } catch (error) {  
         console.log(error.message);
-    }
+    }  
 };
 
 const addToCartFrom = async (req, res) => {
     const productId = req.query.id;
     const quantity = { a: parseInt(req.body.qty) };
-
     userSession = req.session;
     const userData = await User.findById({ _id: userSession.user });
     const productData = await Product.findById({ _id: productId });
@@ -383,15 +382,15 @@ const getCheckout = async (req, res) => {
     try {
         const userId = req.session.user;
         const userData = await User.find({ _id: userId });
-        var cartTotal = userData.cart.totalPrice;
+        var cartTotal = userData[0].cart.totalPrice;
         sellingPrice = cartTotal;
         res.render("user/checkout", { userData, message: req.flash("message") });
     } catch (error) {
         console.log(error.message);
     }
 };
-
-var sellingPrice = 0;
+   
+var sellingPrice ;
 
 const coupenApply = async (req, res) => {
     try {
@@ -419,13 +418,12 @@ const coupenApply = async (req, res) => {
                 res.json({ a });
             }
         } else {
-            console.log("dfg");
             res.json({ message: "Invalid Coupen" });
         }
     } catch (error) {
         console.log(error.message);
     }
-};
+}; 
 
 const createOrder = async (req, res) => {
     try {
@@ -520,7 +518,7 @@ const razorpayCheckout = async (req, res) => {
         let instance = new Razorpay({ key_id: "rzp_test_6ECQ3wFYlifQi2", key_secret: "akkbAG21AjGFcIfvmYditBnf" });
 
         let order = await instance.orders.create({
-            amount: 3000,
+            amount: sellingPrice*100,
             currency: "INR",
             receipt: "receipt#1",
         });
@@ -621,7 +619,7 @@ const exportInvoice = async (req, res) => {
             });
         });
     } catch (error) {
-        console.log(error);
+        console.log(error);            
     }
 };
 
