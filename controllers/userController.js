@@ -7,6 +7,7 @@ const Orders = require("../models/orderModel");
 const Coupon = require("../models/couponModel");
 const { ObjectId } = require("mongodb");
 const Razorpay = require("razorpay");
+const fast2sms = require("fast-two-sms");
 const { validationResult } = require("express-validator");
 
 // HTML to PDF requirements-------------
@@ -36,6 +37,9 @@ const getRegister = async (req, res) => {
     }
 };
 
+let newUser;
+let newOtp;
+
 const postRegister = async (req, res) => {
     const errors = validationResult(req);
     var error1 = errors.errors.find((item) => item.param === "name") || "";
@@ -62,9 +66,9 @@ const postRegister = async (req, res) => {
                     is_admin: 0,
                 });
                 const userData = await user.save();
-
+                newUser = userData._id;
                 if (userData) {
-                    res.redirect("/login");
+                    res.redirect("/getOtp");
                 } else {
                     const userData = [];
                     res.render("user/register", {
@@ -81,6 +85,57 @@ const postRegister = async (req, res) => {
     } else {
         const userData = [];
         res.render("user/register", { message: "Password Must Be Same", userData });
+    }
+};
+
+const sendMessage = function (mobile, res) {
+    let randomOTP = Math.floor(Math.random() * 10000);
+    var options = {
+        authorization: "MSOj0bTnaP8phCARmWqtzkgEV4ZN2Ff9eUxXI7iJQ5HcDBKsL1vYiamnRcMxrsjDJboyFEXl0Sk37pZq",
+        message: `your OTP verification code is ${randomOTP}`,
+        numbers: [mobile],
+    };
+    //send this message
+    fast2sms
+        .sendMessage(options)
+        .then((response) => {
+            console.log("otp sent successfully");
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+    return randomOTP;
+};
+
+const loadotp = async (req, res) => {
+    try {
+        const userData = await User.findById({ _id: newUser });
+        const otp = sendMessage(userData.mobile, res);
+        newOtp = otp;
+        console.log("otp:", otp);
+        res.render("user/otp", { userData, otp });
+    } catch (error) {
+        console.log(error.message);
+    }
+};
+
+const verifyOtp = async (req, res) => {
+    try {
+        const otp = newOtp;
+        const userData = await User.findById({ _id: req.body.user });
+        if (otp == req.body.otp) {
+            userData.isVerified = 1;
+            const user = await userData.save();
+            if (user) {
+                res.redirect("/login");
+            }
+        } else {
+            const userData = await User.findById({ _id: newUser });
+            const otp =1;
+            res.render("user/otp", { message: "Invalid OTP" , userData,otp});
+        }
+    } catch (error) {
+        console.log(error.message);
     }
 };
 
@@ -267,7 +322,7 @@ const addToCart = async (req, res) => {
         console.log(error.message);
     }
 };
- 
+
 const addToCartFrom = async (req, res) => {
     const productId = req.query.id;
     const quantity = { a: parseInt(req.body.qty) };
@@ -279,10 +334,10 @@ const addToCartFrom = async (req, res) => {
     const cartLength = userData.cart.item.length;
     if (add) {
         userData.removeFromWishlist(productId);
-        res.json({ cartLength }); 
+        res.json({ cartLength });
     }
 };
-    
+
 const changeProductQnty = async (req, res) => {
     try {
         const id = req.query.id;
@@ -328,12 +383,16 @@ const getCheckout = async (req, res) => {
     try {
         const userId = req.session.user;
         const userData = await User.find({ _id: userId });
+        var cartTotal = userData.cart.totalPrice;
+        sellingPrice = cartTotal;
         res.render("user/checkout", { userData, message: req.flash("message") });
     } catch (error) {
         console.log(error.message);
     }
 };
+
 var sellingPrice = 0;
+
 const coupenApply = async (req, res) => {
     try {
         const userId = req.session.user;
@@ -348,9 +407,9 @@ const coupenApply = async (req, res) => {
                     const coupenAmount = couponData.amount;
                     sellingPrice = userData.cart.totalPrice - coupenAmount;
                     res.json({ coupenAmount, cartTotal });
-                }else{
-                    let b=1
-                    res.json({ b,cartTotal,minAmt });
+                } else {
+                    let b = 1;
+                    res.json({ b, cartTotal, minAmt });
                 }
                 const coupenAmount = couponData.amount;
                 sellingPrice = userData.cart.totalPrice - coupenAmount;
@@ -372,7 +431,6 @@ const createOrder = async (req, res) => {
     try {
         const userData = await User.findById({ _id: req.session.user });
         // await Coupons.updateOne({ value: req.body.value }, { $push: { coustomer: req.session.userid } });
-
         const populatedData = await userData.populate("cart.item.productId");
 
         let order;
@@ -381,15 +439,15 @@ const createOrder = async (req, res) => {
             order = new Orders({
                 userId: _id,
                 name: userData.name,
-                country,    
+                country,
                 address,
-                city,   
+                city,
                 state,
                 zip,
                 phone: phonenumber,
                 email,
 
-                products: populatedData.cart, 
+                products: populatedData.cart,
                 payment: req.body.payment,
                 sellingPrice: sellingPrice,
             });
@@ -462,7 +520,7 @@ const razorpayCheckout = async (req, res) => {
         let instance = new Razorpay({ key_id: "rzp_test_6ECQ3wFYlifQi2", key_secret: "akkbAG21AjGFcIfvmYditBnf" });
 
         let order = await instance.orders.create({
-            amount: 300,
+            amount: 3000,
             currency: "INR",
             receipt: "receipt#1",
         });
@@ -585,6 +643,8 @@ module.exports = {
     postLogin,
     getRegister,
     postRegister,
+    loadotp,
+    verifyOtp,
     getShop,
     getProducts,
     getCategoryProduct,

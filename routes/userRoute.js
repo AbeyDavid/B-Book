@@ -28,6 +28,8 @@ user.post(
         .withMessage("Password must contain at least one special character"),
     userController.postRegister
 );
+user.get("/getOtp",userController.loadotp)
+user.post('/getOtp', userController.verifyOtp)
 
 user.get("/login", userAuth.isLogout, userController.getLogin);
 user.post("/login", userController.postLogin);
