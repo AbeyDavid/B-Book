@@ -322,10 +322,10 @@ const addToCart = async (req, res) => {
         console.log(error.message);
     }  
 };
-
+   
 const addToCartFrom = async (req, res) => {
     const productId = req.query.id;
-    const quantity = { a: parseInt(req.body.qty) };
+    const quantity = { a: parseInt(req.body.qty) };    
     userSession = req.session;
     const userData = await User.findById({ _id: userSession.user });
     const productData = await Product.findById({ _id: productId });
@@ -574,8 +574,8 @@ const getUserOrders = async (req, res) => {
         res.render("user/userOrders", { userData, categoryData, orders });
     } catch (error) {
         console.log(error.message);
-    }
-};
+    }   
+};    
 
 const getSingleOrderView = async (req, res) => {
     try {
@@ -642,8 +642,8 @@ module.exports = {
     getRegister,
     postRegister,
     loadotp,
-    verifyOtp,
-    getShop,
+    verifyOtp,    
+    getShop,     
     getProducts,
     getCategoryProduct,
     getWishList,

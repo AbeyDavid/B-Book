@@ -155,20 +155,21 @@
 const addToCartbtns = document.querySelectorAll('.addToCartbtn')
 
 const addToCartbtnHandler = async(e)=>{
-    console.log("sdfds");
-    const id = e.target.parentElement.parentElement.children[0].value
+
+    var id = e.target.parentElement.parentElement.children[0].value
     console.log(id);
     const data = {qty :1}
-    console.log(data);
+
     const response = await fetch(`/addToCartFrom?id=${id}`,{
         method:'post',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify(data)
+        body:JSON.stringify(data)    
     })
     const value = await response.json()
     console.log(value);
     document.querySelector('#cartLength').innerText=value.cartLength
     }
+    
 addToCartbtns.forEach(x=>{
   x.addEventListener('click',addToCartbtnHandler) 
 })
